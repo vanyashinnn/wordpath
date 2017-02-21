@@ -1,4 +1,16 @@
+APP = wordpath
+OBJECTS = main.o
 
-all: build
-build:
-	echo hello
+
+CXX = g++
+
+all: $(APP)
+
+%.o: %.cpp
+	$(CXX) -c -o $@ $<
+
+$(APP): $(OBJECTS)
+	$(CXX) -o $(APP) $(OBJECTS)
+
+clean:
+	rm -f $(APP) $(OBJECTS)
