@@ -48,8 +48,10 @@ $(TEST): gtest $(TEST_OBJECTS)
 	$(LOG_INFO) Сборка тестов
 	$(CXX) -o $(TEST) $(TEST_OBJECTS) $(LIBS)
 tests-run: $(TEST)
+	$(LOG_INFO) Запуск тестов
 	./$(TEST)
 test-clean:
+	$(LOG_INFO) Чистка тестов
 	$(RM) $(TEST) $(TEST_OBJECTS)
 
 ###########
@@ -60,6 +62,7 @@ $(APP): gtest $(APP_OBJECTS)
 	$(LOG_INFO) Сборка приложения
 	$(CXX) -o $(APP) $(APP_OBJECTS) $(LIBS)
 app-clean:
+	$(LOG_INFO) Чистка приложения
 	$(RM) $(APP) $(APP_OBJECTS)
 
 
@@ -74,4 +77,5 @@ $(GTEST_TARGET):
 	cd $(GTEST_SRC) && ./configure && make
 	touch $(GTEST_TARGET)
 gtest-clean:
+	$(LOG_INFO) Чистка Gtest
 	$(RM) $(GTEST_SRC)
