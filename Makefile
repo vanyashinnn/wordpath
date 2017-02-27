@@ -15,12 +15,23 @@ RM = @rm -rf
 INCLUDE += -I$(GTEST_SRC)/include
 LIBS += -L$(GTEST_SRC)/lib/.libs -l:libgtest.a -lpthread
 
-LOG_ERROR=@print(){ echo -e "\033[31m"$$*"\033[0m"; }; print
-LOG_INFO=@print(){ echo -e "\033[32m"$$*"\033[0m"; }; print
+LOG_ERROR=@print(){ echo -e "\033[31m$$*\033[0m"; }; print
+LOG_INFO=@print(){ echo -e "\033[32m$$*\033[0m"; }; print
 
 all: app test
 distclean: clean gtest-clean
 clean: app-clean test-clean
+
+help:
+	$(LOG_INFO) "Использование: make [Цель] \n\
+Цели:\n\
+    all:           Сборка тестов и приложения\n\
+    app:           Сборка только приложения\n\
+    test:          Сборка только тестов\n\
+    distclean:     Чистка всего проекта\n\
+    clean:         Чистка тестов и приложения\n\
+    app-clean:     Чистка только приложения\n\
+    test-clean:    Чистка только тестов\n"
 
 ######################
 #   Compile source   #
