@@ -1,10 +1,12 @@
 APP = wordpath
 TEST = wordpath_test
 
-APP_OBJECTS = main.o
+APP_OBJECTS =  src/main.o
+APP_OBJECTS += src/wordpath.o
 
-TEST_OBJECTS = tests/main.o
+TEST_OBJECTS =  tests/main.o
 TEST_OBJECTS += tests/wordpath.o
+TEST_OBJECTS += src/wordpath.o
 
 GTEST_SRC = gtest-1.7.0
 GTEST_TARGET = $(GTEST_SRC)/target
@@ -12,7 +14,7 @@ GTEST_TARGET = $(GTEST_SRC)/target
 CXX = @g++
 RM = @rm -rf
 
-INCLUDE += -I$(GTEST_SRC)/include
+INCLUDE += -I$(GTEST_SRC)/include -Isrc
 LIBS += -L$(GTEST_SRC)/lib/.libs -l:libgtest.a -lpthread
 
 LOG_ERROR=@print(){ echo -e "\033[31m$$*\033[0m"; }; print
