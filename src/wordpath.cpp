@@ -4,6 +4,10 @@ class WordPath::Impl{
 public:
     explicit Impl(const std::string& first, const std::string& second, const std::string& wordsFilename):
     status(WordPath::PATH_NOT_FOUND){
+        if(first == second){
+            words.push_back(first);
+            status = PATH_FOUND;
+        }
         //std::cout << "WordPath::Impl()\n";
     }
     ~Impl(){

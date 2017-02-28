@@ -14,7 +14,6 @@ TEST(someTest, TestWordPath){
     switch(error){
         case WordPath::PATH_NOT_FOUND:
             EXPECT_EQ(stringlist.empty(), true);
-            EXPECT_EQ((stringlist.size() < 2), false);
             break;
         case WordPath::PATH_FOUND:
             EXPECT_EQ(stringlist.empty(), false);
