@@ -4,10 +4,10 @@ class WordPath::Impl{
 public:
     explicit Impl(const std::string& first, const std::string& second, const std::string& wordsFilename):
     status(WordPath::PATH_NOT_FOUND){
-        std::cout << "WordPath::Impl()\n";
+        //std::cout << "WordPath::Impl()\n";
     }
     ~Impl(){
-        std::cout << "WordPath::~Impl()\n";
+        //std::cout << "WordPath::~Impl()\n";
     }
     StringList words;
     WordPath::Error status;
@@ -16,14 +16,14 @@ public:
 WordPath::WordPath(const std::string& first, const std::string& second, const std::string& wordsFilename):
     pimpl(new Impl(first, second, wordsFilename))
 {
-    std::cout << "WordPath(...)\n";
+    //std::cout << "WordPath(...)\n";
 }
 
 WordPath::~WordPath()
 {
     delete pimpl;
     pimpl = 0;
-    std::cout << "~WordPath()\n";
+    //std::cout << "~WordPath()\n";
 }
 
 WordPath::Error WordPath::status() const
