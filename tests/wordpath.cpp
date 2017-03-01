@@ -3,9 +3,9 @@
 #include "wordpath.h"
 
 TEST(someTest, TestWordPath){
-    std::vector<std::string> stringlist;
-    std::string first("кот");
-    std::string second("сыр");
+    std::vector<std::wstring> stringlist;
+    std::wstring first(L"кот");
+    std::wstring second(L"сыр");
     WordPath wordPath(first, second);
     stringlist = wordPath.words();
 
@@ -26,8 +26,10 @@ TEST(someTest, TestWordPath){
 }
 
 TEST(someTest, OneWord){
-    std::vector<std::string> stringlist;
-    std::string first("кот");
+    std::vector<std::wstring> stringlist;
+    std::wstring first(L"кот");
+    EXPECT_EQ(first.length(), 3);
+
     WordPath wordPath(first, first);
     stringlist = wordPath.words();
 

@@ -2,7 +2,7 @@
 
 class WordPath::Impl{
 public:
-    explicit Impl(const std::string& first, const std::string& second, const std::string& wordsFilename):
+    explicit Impl(const std::wstring& first, const std::wstring& second, const char * wordsFilename):
     status(WordPath::PATH_NOT_FOUND){
         if(first == second){
             words.push_back(first);
@@ -17,7 +17,7 @@ public:
     WordPath::Error status;
 };
 
-WordPath::WordPath(const std::string& first, const std::string& second, const std::string& wordsFilename):
+WordPath::WordPath(const std::wstring& first, const std::wstring& second, const char * wordsFilename):
     pimpl(new Impl(first, second, wordsFilename))
 {
     //std::cout << "WordPath(...)\n";
