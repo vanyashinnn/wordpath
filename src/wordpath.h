@@ -8,12 +8,16 @@ class WordPath
 public:
     enum Error{
         PATH_FOUND = 0,
-        PATH_NOT_FOUND
+        PATH_NOT_FOUND,
+        DICTIONARY_NOT_FOUND,
+        WORDS_LENGTH_NOT_EQUAL,
+        EMPTY_WORDS
     };
     explicit WordPath(const std::wstring & first, const std::wstring & second, const char * wordsFilename = "res/word_rus.txt");
     ~WordPath();
     Error status() const;
     StringList words() const;
+    void test() const;
 private:
     WordPath(const WordPath&);
     class Impl;

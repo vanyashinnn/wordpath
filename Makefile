@@ -13,6 +13,7 @@ GTEST_TARGET = $(GTEST_SRC)/target
 
 CXX = @g++
 RM = @rm -rf
+CXX_FLAGS = -std=c++11
 
 INCLUDE += -I$(GTEST_SRC)/include -Isrc
 LIBS += -L$(GTEST_SRC)/lib/.libs -l:libgtest.a -lpthread
@@ -40,7 +41,7 @@ help:
 #   Compile source   #
 ######################
 %.o: %.cpp
-	$(CXX) -c -o $@ $< $(INCLUDE)
+	$(CXX) -c -o $@ $< $(INCLUDE) $(CXX_FLAGS)
 
 #############
 #   Tests   #
