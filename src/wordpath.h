@@ -2,6 +2,7 @@
 #define WORDPATH_H
 #include <iostream>
 #include <vector>
+#define RUS_LOCALE "ru_RU.UTF-8"
 typedef std::vector<std::wstring> StringList;
 class WordPath
 {

@@ -27,7 +27,7 @@ public:
             return WordPath::DICTIONARY_NOT_FOUND;
         }
         std::wstring tmp;
-        in.imbue(std::locale("ru_RU.UTF-8"));
+        in.imbue(std::locale(RUS_LOCALE));
         while(true){
             in >> tmp;
             if(tmp.length() == _first.length()){
@@ -72,8 +72,12 @@ StringList WordPath::words() const
 
 void WordPath::test() const
 {
-    std::wcout << "size: " << pimpl->_dictionary.size() << L"\n";
+    std::wofstream out("out.txt");
+    out.imbue(std::locale(RUS_LOCALE));
+    out << "size: " << pimpl->_dictionary.size() << L"\n";
     for(const auto & word: pimpl->_dictionary){
+        out << word << "\n";
         std::wcout << word << "\n";
     }
+    out.close();
 }
