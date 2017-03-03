@@ -70,6 +70,20 @@ StringList WordPath::words() const
     return pimpl->_words;
 }
 
+int WordPath::distance(const std::wstring& first, const std::wstring& second)
+{
+    if(first.length() != second.length()){
+        return -1;
+    }
+    int distance(0);
+    for(int i=0; i<first.length(); ++i){
+        if(first.at(i) != second.at(i)){
+            ++distance;
+        }
+    }
+    return distance;
+}
+
 void WordPath::test() const
 {
     std::wofstream out("out.txt");

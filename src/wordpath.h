@@ -18,6 +18,7 @@ public:
     ~WordPath();
     Error status() const;
     StringList words() const;
+    static int distance(const std::wstring& first, const std::wstring& second);
     void test() const;
 private:
     WordPath(const WordPath&);
