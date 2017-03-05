@@ -13,29 +13,29 @@ static int random(int min, int max){
     return (rand()%(max - min + 1)) + min;
 }
 
-namespace {
-    struct OzhoegovDict{
-        void read(std::wifstream& in){
-            std::wcout << L"read\n";
-            std::getline(in, VOCAB, L'|');
-            std::getline(in, BASEFORM, L'|');
-            std::getline(in, PHONGL, L'|');
-            std::getline(in, GRCLASSGL, L'|');
-            std::getline(in, STYLGL, L'|');
-            std::getline(in, DEF, L'|');
-            std::getline(in, ANTI, L'|');
-            std::getline(in, LEGLEXAM, L'\n');
-        }
-        std::wstring VOCAB;
-        std::wstring BASEFORM;
-        std::wstring PHONGL;
-        std::wstring GRCLASSGL;
-        std::wstring STYLGL;
-        std::wstring DEF;
-        std::wstring ANTI;
-        std::wstring LEGLEXAM;
-    };
-}
+//namespace {
+//    struct OzhoegovDict{
+//        void read(std::wifstream& in){
+//            std::wcout << L"read\n";
+//            std::getline(in, VOCAB, L'|');
+//            std::getline(in, BASEFORM, L'|');
+//            std::getline(in, PHONGL, L'|');
+//            std::getline(in, GRCLASSGL, L'|');
+//            std::getline(in, STYLGL, L'|');
+//            std::getline(in, DEF, L'|');
+//            std::getline(in, ANTI, L'|');
+//            std::getline(in, LEGLEXAM, L'\n');
+//        }
+//        std::wstring VOCAB;
+//        std::wstring BASEFORM;
+//        std::wstring PHONGL;
+//        std::wstring GRCLASSGL;
+//        std::wstring STYLGL;
+//        std::wstring DEF;
+//        std::wstring ANTI;
+//        std::wstring LEGLEXAM;
+//    };
+//}
 
 class WordPath::Impl{
 public:
@@ -133,14 +133,15 @@ public:
         if(!in){
             return WordPath::DICTIONARY_NOT_FOUND;
         }
-        OzhoegovDict tmp;
+        String tmp;
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
-            tmp.read(in);
-            std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
-            std::wcout << L"GRCLASSGL: " << tmp.GRCLASSGL << L"\n";
-            if(tmp.VOCAB.length() == _first.length()){
-                _dictionary.insert(tmp.VOCAB);
+            in >> tmp;
+            //tmp.read(in);
+            //std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
+            //std::wcout << L"GRCLASSGL: " << tmp.GRCLASSGL << L"\n";
+            if(tmp.length() == _first.length()){
+                _dictionary.insert(tmp);
             }
             if(!in.good()){
                 break;
