@@ -37,12 +37,15 @@ int main(int argc, char* argv[]){
     wordsFile.close();
 
     // run program
-    WordPath wordPath(first, second, wordsFilename);
+    WordPath wordPath(first, second, dictionaryFilename);
 
     if(WordPath::PATH_FOUND != wordPath.status()) {
         std::wcout << L"\033[32m" << wordPath.statusText() << L"\033[0m\n";
         return 0;
     }
-    wordPath.test();
+    const StringList& words = wordPath.words();
+    for(const auto& word: words){
+        std::wcout << word << L"\n";
+    }
     return 0;
 }

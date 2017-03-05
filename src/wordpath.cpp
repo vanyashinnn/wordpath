@@ -1,6 +1,17 @@
 #include <fstream>
 #include <locale>
+#include <map>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
 #include "wordpath.h"
+//#define DEBUG
+typedef std::multimap<int, String> WordsMap;
+typedef std::pair<WordsMap::iterator, WordsMap::iterator> WordsMapEqualRange;
+
+static int random(int min, int max){
+    return (rand()%(max - min + 1)) + min;
+}
 
 class WordPath::Impl{
 public:
@@ -9,7 +20,80 @@ public:
         _second(second),
         _status(WordPath::PATH_NOT_FOUND)
     {
+        srand(time(0));
+        _words.push_back(first);
         _status = readWords(wordsFilename);
+        if(WordPath::PATH_NOT_FOUND != _status){
+            return;
+        }
+        searchPath();
+        postprocessing();
+    }
+    void postprocessing(){
+
+        StringList::iterator first = _words.begin();
+        StringList::iterator last;
+        while(true){
+#ifdef DEBUG
+            //
+            std::wcout << L"size: " << _words.size() << L"\n";
+            for(const auto & word: _words){
+                std::wcout << word << "\n";
+            }
+            //
+#endif
+            ++first;
+            if(first == _words.end()){
+                break;
+            }
+            StringList::iterator from = first+1;
+            last = std::find(from, _words.end(), (*first));
+            if(last == _words.end()){
+                continue;
+            }
+            StringList::iterator to = last+1;
+            if(from != _words.end() && to != _words.end()){
+#ifdef DEBUG
+                std::wcout << (*first) << L": " << (*last) << L"\n";
+#endif
+                _words.erase(from, to);
+                first = _words.begin();
+            }
+        }
+    }
+
+    void searchPath(){
+#ifdef DEBUG
+        std::wcout << L"searchPath for " << _words.back() << L"\n";
+#endif
+        _nextWords.clear();
+        for(const auto& word: _dictionary){
+            if(WordPath::difference(word, _words.back()) == 1){
+                int weight = WordPath::difference(word, _second);
+                _nextWords.insert(std::pair<int, String>(weight, word));
+            }
+        }
+#ifdef DEBUG
+        std::wcout << L"Map:\n";
+        for(WordsMap::iterator it = _nextWords.begin(); it != _nextWords.end(); ++it){
+            std::wcout << it->first << L": " << it->second << L"\n";
+        }
+#endif
+        if(_nextWords.empty()){
+            _status = WordPath::PATH_NOT_FOUND;
+            return;
+        }
+        _equalRange = _nextWords.equal_range(_nextWords.begin()->first);
+        _equalRangeList.clear();
+        for(WordsMap::iterator it = _equalRange.first; it != _equalRange.second; ++it){
+            _equalRangeList.push_back(it->second);
+        }
+        _words.push_back(_equalRangeList.at(random(0, _equalRangeList.size() - 1)));
+        if(_words.back() == _second){
+            _status = WordPath::PATH_FOUND;
+            return;
+        }
+        searchPath();
     }
     WordPath::Error readWords(const char * wordsFilename){
         if(_first.empty()){
@@ -19,7 +103,6 @@ public:
             return WordPath::WORDS_LENGTH_NOT_EQUAL;
         }
         if(_first == _second){
-            _words.push_back(_first);
             return WordPath::PATH_FOUND;
         }
         std::wifstream in(wordsFilename);
@@ -40,10 +123,13 @@ public:
         in.close();
         return WordPath::PATH_NOT_FOUND;
     }
+    WordsMapEqualRange _equalRange;
+    StringList _equalRangeList;
     String _first;
     String _second;
     StringList _words;
     StringList _dictionary;
+    WordsMap _nextWords;
     WordPath::Error _status;
 };
 
@@ -71,12 +157,12 @@ String WordPath::statusText() const
 }
 
 
-StringList WordPath::words() const
+StringList& WordPath::words() const
 {
     return pimpl->_words;
 }
 
-int WordPath::distance(const String& first, const String& second)
+int WordPath::difference(const String& first, const String& second)
 {
     if(first.length() != second.length()){
         return -1;

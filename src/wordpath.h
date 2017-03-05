@@ -21,8 +21,8 @@ public:
     ~WordPath();
     Error status() const;
     String statusText() const;
-    StringList words() const;
-    static int distance(const String& first, const String& second);
+    StringList& words() const;
+    static int difference(const String& first, const String& second);
     static String getErrorText(Error error);
     void test() const;
 private:
