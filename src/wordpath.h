@@ -2,10 +2,12 @@
 #define WORDPATH_H
 #include <iostream>
 #include <vector>
+#include <set>
 
 #define RUS_LOCALE "ru_RU.UTF-8"
 typedef std::wstring String;
 typedef std::vector<String> StringList;
+typedef std::set<String> StringSet;
 
 class WordPath
 {
@@ -17,7 +19,7 @@ public:
         WORDS_LENGTH_NOT_EQUAL,
         EMPTY_WORDS
     };
-    explicit WordPath(const String & first, const String & second, const char * wordsFilename = "res/word_rus.txt");
+    explicit WordPath(const String & first, const String & second, const char * wordsFilename = "res/OZHEGOV.TXT");
     ~WordPath();
     Error status() const;
     String statusText() const;
