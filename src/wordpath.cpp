@@ -4,7 +4,7 @@
 
 class WordPath::Impl{
 public:
-    explicit Impl(const std::wstring& first, const std::wstring& second, const char * wordsFilename):
+    explicit Impl(const String& first, const String& second, const char * wordsFilename):
         _first(first),
         _second(second),
         _status(WordPath::PATH_NOT_FOUND)
@@ -26,7 +26,7 @@ public:
         if(!in){
             return WordPath::DICTIONARY_NOT_FOUND;
         }
-        std::wstring tmp;
+        String tmp;
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
             in >> tmp;
@@ -40,14 +40,14 @@ public:
         in.close();
         return WordPath::PATH_NOT_FOUND;
     }
-    std::wstring _first;
-    std::wstring _second;
+    String _first;
+    String _second;
     StringList _words;
     StringList _dictionary;
     WordPath::Error _status;
 };
 
-WordPath::WordPath(const std::wstring& first, const std::wstring& second, const char * wordsFilename):
+WordPath::WordPath(const String& first, const String& second, const char * wordsFilename):
     pimpl(new Impl(first, second, wordsFilename))
 {
     //std::cout << "WordPath(...)\n";
@@ -65,12 +65,18 @@ WordPath::Error WordPath::status() const
     return pimpl->_status;
 }
 
+String WordPath::statusText() const
+{
+    return WordPath::getErrorText(pimpl->_status);
+}
+
+
 StringList WordPath::words() const
 {
     return pimpl->_words;
 }
 
-int WordPath::distance(const std::wstring& first, const std::wstring& second)
+int WordPath::distance(const String& first, const String& second)
 {
     if(first.length() != second.length()){
         return -1;
@@ -82,6 +88,23 @@ int WordPath::distance(const std::wstring& first, const std::wstring& second)
         }
     }
     return distance;
+}
+
+String WordPath::getErrorText(WordPath::Error error)
+{
+    switch(error){
+    case PATH_FOUND:
+        return L"Путь найден.";
+    case PATH_NOT_FOUND:
+        return L"Путь не найден.";
+    case DICTIONARY_NOT_FOUND:
+        return L"Словарь не найден.";
+    case WORDS_LENGTH_NOT_EQUAL:
+        return L"Слова разной длины.";
+    case EMPTY_WORDS:
+        return L"Слова нулевой длины.";
+    }
+    return L"Не известная ошибка.";
 }
 
 void WordPath::test() const
