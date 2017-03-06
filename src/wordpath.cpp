@@ -9,33 +9,32 @@
 typedef std::multimap<int, String> WordsMap;
 typedef std::pair<WordsMap::iterator, WordsMap::iterator> WordsMapEqualRange;
 
-static int random(int min, int max){
+static int randomMinMax(int min, int max){
     return (rand()%(max - min + 1)) + min;
 }
 
-//namespace {
-//    struct OzhoegovDict{
-//        void read(std::wifstream& in){
-//            std::wcout << L"read\n";
-//            std::getline(in, VOCAB, L'|');
-//            std::getline(in, BASEFORM, L'|');
-//            std::getline(in, PHONGL, L'|');
-//            std::getline(in, GRCLASSGL, L'|');
-//            std::getline(in, STYLGL, L'|');
-//            std::getline(in, DEF, L'|');
-//            std::getline(in, ANTI, L'|');
-//            std::getline(in, LEGLEXAM, L'\n');
-//        }
-//        std::wstring VOCAB;
-//        std::wstring BASEFORM;
-//        std::wstring PHONGL;
-//        std::wstring GRCLASSGL;
-//        std::wstring STYLGL;
-//        std::wstring DEF;
-//        std::wstring ANTI;
-//        std::wstring LEGLEXAM;
-//    };
-//}
+namespace {
+    struct OzhoegovDict{
+        void read(std::wifstream& in){
+            std::getline(in, VOCAB, L'|');
+            std::getline(in, BASEFORM, L'|');
+            std::getline(in, PHONGL, L'|');
+            std::getline(in, GRCLASSGL, L'|');
+            std::getline(in, STYLGL, L'|');
+            std::getline(in, DEF, L'|');
+            std::getline(in, ANTI, L'|');
+            std::getline(in, LEGLEXAM, L'\n');
+        }
+        std::wstring VOCAB;
+        std::wstring BASEFORM;
+        std::wstring PHONGL;
+        std::wstring GRCLASSGL;
+        std::wstring STYLGL;
+        std::wstring DEF;
+        std::wstring ANTI;
+        std::wstring LEGLEXAM;
+    };
+}
 
 class WordPath::Impl{
 public:
@@ -79,18 +78,34 @@ public:
             ++current;
         }
     }
+    bool chance(const int diff){
+        std::wcout << L"difference: " << diff << L"\n";
+        std::wcout << L"_first.size(): " << _first.size() << L"\n";
+        int x = 100*(diff-2)/(_first.size()-1);
+        std::wcout << L"percent: " << x << L"\n";
+        bool ch = (randomMinMax(0, 100) <= x);
+        std::wcout << L"chance: " << ch << L"\n";
+        return ch;
+    }
 
     void searchPath(){
         int counter(0);
         while(true){
+            std::wcout << L"--------------search--------------\n";
 #ifdef DEBUG
             std::wcout << L"searchPath for " << _words.back() << L"\n";
 #endif
             _nextWords.clear();
+            int diff = WordPath::difference(_words.back(), _second);
+            bool useRandom = chance(diff);
             for(const auto& word: _dictionary){
                 if(WordPath::difference(word, _words.back()) == 1){
-                    int weight = WordPath::difference(word, _second);
-                    _nextWords.insert(std::pair<int, String>(weight, word));
+                    int pos = getFirstDiff(word, _words.back());
+                    int w = 1;
+                    if(!useRandom){
+                        w = weight(word, pos);
+                    }
+                    _nextWords.insert(std::pair<int, String>(w, word));
                 }
             }
 #ifdef DEBUG
@@ -103,12 +118,12 @@ public:
                 _status = WordPath::PATH_NOT_FOUND;
                 return;
             }
-            _equalRange = _nextWords.equal_range(_nextWords.begin()->first);
+            _equalRange = _nextWords.equal_range(_nextWords.rbegin()->first);
             _equalRangeList.clear();
             for(WordsMap::iterator it = _equalRange.first; it != _equalRange.second; ++it){
                 _equalRangeList.push_back(it->second);
             }
-            _words.push_back(_equalRangeList.at(random(0, _equalRangeList.size() - 1)));
+            _words.push_back(_equalRangeList.at(randomMinMax(0, _equalRangeList.size() - 1)));
             if(_words.back() == _second){
                 _status = WordPath::PATH_FOUND;
                 return;
@@ -118,6 +133,45 @@ public:
                 postprocessing();
             }
         }
+    }
+    int getFirstDiff(const std::wstring& first, const std::wstring& second){
+        for(int i=0; i<first.length(); ++i){
+            if(first.at(i) != second.at(i)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    bool isVowel(const wchar_t wc) const{
+        static const std::wstring vowels = L"аяоёуюыиэе";
+        return vowels.find(wc) != std::wstring::npos;
+    }
+    bool isConsonant(const wchar_t wc) const{
+        static const std::wstring vowels = L"йцкнгшщзхфвпрлджчстб";
+        return vowels.find(wc) != std::wstring::npos;
+    }
+
+    int weight(const String& word, const int pos) const{
+        std::wcout << _words.back() << L" => " << word << L" => " << _second;
+        int w(0);
+        if(isConsonant(_words.back().at(pos)) && isVowel(word.at(pos)) && isVowel(_second.at(pos))){
+            w += 10;
+        }
+        if(isVowel(_words.back().at(pos)) && isConsonant(word.at(pos)) && isConsonant(_second.at(pos))){
+            w += 10;
+        }
+        if(isVowel(word.at(pos)) && isVowel(_second.at(pos))){
+            w += 5;
+        }
+        if(isConsonant(word.at(pos)) && isConsonant(_second.at(pos))){
+            w += 5;
+        }
+        if(word.at(pos) == _second.at(pos)){
+            w += 1;
+        }
+        std::wcout << L" (" << pos << L", " << w << L")\n";
+        return w;
     }
     WordPath::Error readWords(const char * wordsFilename){
         if(_first.empty()){
@@ -133,15 +187,14 @@ public:
         if(!in){
             return WordPath::DICTIONARY_NOT_FOUND;
         }
-        String tmp;
+        OzhoegovDict tmp;
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
-            in >> tmp;
-            //tmp.read(in);
+            tmp.read(in);
             //std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
-            //std::wcout << L"GRCLASSGL: " << tmp.GRCLASSGL << L"\n";
-            if(tmp.length() == _first.length()){
-                _dictionary.insert(tmp);
+            //std::wcout << L"DEF: " << tmp.DEF << L"\n";
+            if(tmp.VOCAB.length() == _first.length()){
+                _dictionary.insert(tmp.VOCAB);
             }
             if(!in.good()){
                 break;
