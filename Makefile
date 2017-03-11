@@ -13,10 +13,14 @@ GTEST_TARGET = $(GTEST_SRC)/target
 
 CXX = @g++
 RM = @rm -rf
-CXX_FLAGS = -std=c++11
 
 INCLUDE += -I$(GTEST_SRC)/include -Isrc
 LIBS += -L$(GTEST_SRC)/lib/.libs -l:libgtest.a -lpthread
+
+
+CXXFLAGS += -std=c++11 $(INCLUDE)
+# CXXFLAGS += -D DEBUG
+
 
 LOG_ERROR=@print(){ echo -e "\033[31m$$*\033[0m"; }; print
 LOG_INFO=@print(){ echo -e "\033[32m$$*\033[0m"; }; print
@@ -37,11 +41,6 @@ help:
     test-clean:    Чистка только тестов\n\
     help:          Показать эту справку\n"
 
-######################
-#   Compile source   #
-######################
-%.o: %.cpp
-	$(CXX) -c -o $@ $< $(INCLUDE) $(CXX_FLAGS)
 
 #############
 #   Tests   #

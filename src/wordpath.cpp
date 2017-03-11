@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <ctime>
 #include "wordpath.h"
-#define DEBUG
 typedef std::multimap<int, String> WordsMap;
 typedef std::pair<WordsMap::iterator, WordsMap::iterator> WordsMapEqualRange;
 
@@ -79,20 +78,22 @@ public:
         }
     }
     bool chance(const int diff){
+        int x = 100*(diff-2)/(_first.size()-1);
+        bool ch = (randomMinMax(0, 100) <= x);
+#ifdef DEBUG
         std::wcout << L"difference: " << diff << L"\n";
         std::wcout << L"_first.size(): " << _first.size() << L"\n";
-        int x = 100*(diff-2)/(_first.size()-1);
         std::wcout << L"percent: " << x << L"\n";
-        bool ch = (randomMinMax(0, 100) <= x);
         std::wcout << L"chance: " << ch << L"\n";
+#endif
         return ch;
     }
 
     void searchPath(){
         int counter(0);
         while(true){
-            std::wcout << L"--------------search--------------\n";
 #ifdef DEBUG
+            std::wcout << L"--------------search--------------\n";
             std::wcout << L"searchPath for " << _words.back() << L"\n";
 #endif
             _nextWords.clear();
@@ -111,7 +112,7 @@ public:
 #ifdef DEBUG
             std::wcout << L"Map:\n";
             for(WordsMap::iterator it = _nextWords.begin(); it != _nextWords.end(); ++it){
-                std::wcout << it->first << L": " << it->second << L"\n";
+                std::wcout << it->first << L": " << it->second << L"(" <<WordPath::difference(it->second, _second)<< L")\n";
             }
 #endif
             if(_nextWords.empty()){
@@ -128,10 +129,16 @@ public:
                 _status = WordPath::PATH_FOUND;
                 return;
             }
-            counter = (counter+1)%1000;
+            counter = (counter+1)%10;
             if(0 == counter){
                 postprocessing();
             }
+#ifdef DEBUG
+            std::wcout << L"List:\n";
+            for(const auto& word: _words){
+                std::wcout << word << L"\n";
+            }
+#endif
         }
     }
     int getFirstDiff(const std::wstring& first, const std::wstring& second){
@@ -153,27 +160,33 @@ public:
     }
 
     int weight(const String& word, const int pos) const{
+#ifdef DEBUG
         std::wcout << _words.back() << L" => " << word << L" => " << _second;
+#endif
         int w(0);
-        if(isConsonant(_words.back().at(pos)) && isVowel(word.at(pos)) && isVowel(_second.at(pos))){
-            w += 10;
+        for(int i=0; i<word.length(); ++i){
+            if(word.at(i) == _second.at(i)){
+                w += 3;
+            }
+            if(isVowel(word.at(i)) && isVowel(_second.at(i))){
+                w += 2;
+            }
+            if(isConsonant(word.at(i)) && isConsonant(_second.at(i))){
+                w += 2;
+            }
+            if(isConsonant(_words.back().at(i)) && isVowel(word.at(i)) && isVowel(_second.at(i))){
+                w += 2;
+            }
+            if(isVowel(_words.back().at(i)) && isConsonant(word.at(i)) && isConsonant(_second.at(i))){
+                w += 2;
+            }
         }
-        if(isVowel(_words.back().at(pos)) && isConsonant(word.at(pos)) && isConsonant(_second.at(pos))){
-            w += 10;
-        }
-        if(isVowel(word.at(pos)) && isVowel(_second.at(pos))){
-            w += 5;
-        }
-        if(isConsonant(word.at(pos)) && isConsonant(_second.at(pos))){
-            w += 5;
-        }
-        if(word.at(pos) == _second.at(pos)){
-            w += 1;
-        }
-        std::wcout << L" (" << pos << L", " << w << L")\n";
         return w;
     }
     WordPath::Error readWords(const char * wordsFilename){
+#ifdef DEBUG
+            std::wcout << L"Чтение слов.\n";
+#endif
         if(_first.empty()){
             return WordPath::EMPTY_WORDS;
         }
@@ -191,8 +204,10 @@ public:
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
             tmp.read(in);
-            //std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
-            //std::wcout << L"DEF: " << tmp.DEF << L"\n";
+#ifdef DEBUG
+            std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
+            std::wcout << L"DEF: " << tmp.DEF << L"\n";
+#endif
             if(tmp.VOCAB.length() == _first.length()){
                 _dictionary.insert(tmp.VOCAB);
             }
