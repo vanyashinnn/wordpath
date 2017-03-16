@@ -49,6 +49,7 @@ public:
         if(WordPath::PATH_NOT_FOUND != _status){
             return;
         }
+        _difference = first.length();
         searchPath();
         postprocessing();
     }
@@ -78,7 +79,7 @@ public:
         }
     }
     bool chance(const int diff){
-        int x = 100*(diff-2)/(_first.size()-1);
+        int x = 100*(diff-1)/(_first.size()-1);
         bool ch = (randomMinMax(0, 100) <= x);
 #ifdef DEBUG
         std::wcout << L"difference: " << diff << L"\n";
@@ -90,55 +91,59 @@ public:
     }
 
     void searchPath(){
-        int counter(0);
-        while(true){
-#ifdef DEBUG
-            std::wcout << L"--------------search--------------\n";
-            std::wcout << L"searchPath for " << _words.back() << L"\n";
-#endif
-            _nextWords.clear();
-            int diff = WordPath::difference(_words.back(), _second);
-            bool useRandom = chance(diff);
-            for(const auto& word: _dictionary){
-                if(WordPath::difference(word, _words.back()) == 1){
-                    int pos = getFirstDiff(word, _words.back());
-                    int w = 1;
-                    if(!useRandom){
-                        w = weight(word, pos);
-                    }
-                    _nextWords.insert(std::pair<int, String>(w, word));
+        int maxPath = 10000;
+        int maxAttempts = 100;
+        for(int i=0; i<maxAttempts; ++i){
+            std::wcout << L"[";
+            for(int p=0; p<100; ++p){
+                if(p <= (i*100)/maxAttempts){
+                    std::wcout << L"#";
+                }else{
+                    std::wcout << L" ";
                 }
             }
+            std::wcout << L"]\n";
+            _words.clear();
+            _words.push_back(_first);
+            for(int count=0; count<maxPath; ++count){
+                _nextWords.clear();
+                int diff = WordPath::difference(_words.back(), _second);
+                bool useRandom = true;//chance(diff);
+                for(const auto& word: _dictionary){
+                    if(WordPath::difference(word, _words.back()) == 1){
+                        int pos = getFirstDiff(word, _words.back());
+                        int w = 1;
+                        if(!useRandom){
+                            w = weight(word, pos);
+                        }
+                        _nextWords.insert(std::pair<int, String>((w > 2)? 1: 0, word));
+                    }
+                }
+                if(_nextWords.empty()){
+                    break;
+                }
+                _equalRange = _nextWords.equal_range(_nextWords.rbegin()->first);
+                _equalRangeList.clear();
+                for(WordsMap::iterator it = _equalRange.first; it != _equalRange.second; ++it){
+                    _equalRangeList.push_back(it->second);
+                }
+                _words.push_back(_equalRangeList.at(randomMinMax(0, _equalRangeList.size() - 1)));
+                if(_words.back() == _second){
+                    _status = WordPath::PATH_FOUND;
+                    break;
+                }
+            }
+            postprocessing();
 #ifdef DEBUG
-            std::wcout << L"Map:\n";
-            for(WordsMap::iterator it = _nextWords.begin(); it != _nextWords.end(); ++it){
-                std::wcout << it->first << L": " << it->second << L"(" <<WordPath::difference(it->second, _second)<< L")\n";
-            }
-#endif
-            if(_nextWords.empty()){
-                _status = WordPath::PATH_NOT_FOUND;
-                return;
-            }
-            _equalRange = _nextWords.equal_range(_nextWords.rbegin()->first);
-            _equalRangeList.clear();
-            for(WordsMap::iterator it = _equalRange.first; it != _equalRange.second; ++it){
-                _equalRangeList.push_back(it->second);
-            }
-            _words.push_back(_equalRangeList.at(randomMinMax(0, _equalRangeList.size() - 1)));
-            if(_words.back() == _second){
-                _status = WordPath::PATH_FOUND;
-                return;
-            }
-            counter = (counter+1)%10;
-            if(0 == counter){
-                postprocessing();
-            }
-#ifdef DEBUG
-            std::wcout << L"List:\n";
+            std::wcout << L"------------(" << (i+1) << L")------------\n";
             for(const auto& word: _words){
-                std::wcout << word << L"\n";
+                std::wcout << word << L" (" << WordPath::difference(word, _second) << L")\n";
             }
 #endif
+            std::wcout << L"\033[1A";
+            if(WordPath::PATH_FOUND == _status){
+                break;
+            }
         }
     }
     int getFirstDiff(const std::wstring& first, const std::wstring& second){
@@ -161,9 +166,9 @@ public:
 
     int weight(const String& word, const int pos) const{
 #ifdef DEBUG
-        std::wcout << _words.back() << L" => " << word << L" => " << _second;
+        std::wcout << _words.back() << L" => " << word << L" => " << _second << L"\n";
 #endif
-        int w(0);
+        int w(_first.length()-WordPath::difference(word, _second));
         for(int i=0; i<word.length(); ++i){
             if(word.at(i) == _second.at(i)){
                 w += 3;
@@ -172,21 +177,21 @@ public:
                 w += 2;
             }
             if(isConsonant(word.at(i)) && isConsonant(_second.at(i))){
-                w += 2;
+                //w += 2;
             }
             if(isConsonant(_words.back().at(i)) && isVowel(word.at(i)) && isVowel(_second.at(i))){
-                w += 2;
+                //w += 2;
+            }
+            if(isVowel(word.at(i))){
+                ++w;
             }
             if(isVowel(_words.back().at(i)) && isConsonant(word.at(i)) && isConsonant(_second.at(i))){
-                w += 2;
+                //w += 2;
             }
         }
         return w;
     }
     WordPath::Error readWords(const char * wordsFilename){
-#ifdef DEBUG
-            std::wcout << L"Чтение слов.\n";
-#endif
         if(_first.empty()){
             return WordPath::EMPTY_WORDS;
         }
@@ -204,10 +209,6 @@ public:
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
             tmp.read(in);
-#ifdef DEBUG
-            std::wcout << L"VOCAB: " << tmp.VOCAB << L"\n";
-            std::wcout << L"DEF: " << tmp.DEF << L"\n";
-#endif
             if(tmp.VOCAB.length() == _first.length()){
                 _dictionary.insert(tmp.VOCAB);
             }
@@ -220,6 +221,7 @@ public:
     }
     WordsMapEqualRange _equalRange;
     StringList _equalRangeList;
+    int _difference;
     String _first;
     String _second;
     StringList _words;
@@ -231,14 +233,12 @@ public:
 WordPath::WordPath(const String& first, const String& second, const char * wordsFilename):
     pimpl(new Impl(first, second, wordsFilename))
 {
-    //std::cout << "WordPath(...)\n";
 }
 
 WordPath::~WordPath()
 {
     delete pimpl;
     pimpl = 0;
-    //std::cout << "~WordPath()\n";
 }
 
 WordPath::Error WordPath::status() const
