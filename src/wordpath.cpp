@@ -93,10 +93,11 @@ public:
     void searchPath(){
         int maxPath = 10000;
         int maxAttempts = 100;
+        int statusBarSize = 35;
         for(int i=0; i<maxAttempts; ++i){
             std::wcout << L"[";
-            for(int p=0; p<100; ++p){
-                if(p <= (i*100)/maxAttempts){
+            for(int p=0; p<statusBarSize; ++p){
+                if(p <= (i*statusBarSize)/maxAttempts){
                     std::wcout << L"#";
                 }else{
                     std::wcout << L" ";
@@ -141,6 +142,10 @@ public:
             }
 #endif
             std::wcout << L"\033[1A";
+            for(int p=0; p<(statusBarSize+2); ++p){
+                std::wcout << L" ";
+            }
+            std::wcout << L"\n\033[1A";
             if(WordPath::PATH_FOUND == _status){
                 break;
             }
@@ -177,16 +182,16 @@ public:
                 w += 2;
             }
             if(isConsonant(word.at(i)) && isConsonant(_second.at(i))){
-                //w += 2;
+                w += 2;
             }
             if(isConsonant(_words.back().at(i)) && isVowel(word.at(i)) && isVowel(_second.at(i))){
-                //w += 2;
+                w += 2;
             }
             if(isVowel(word.at(i))){
                 ++w;
             }
             if(isVowel(_words.back().at(i)) && isConsonant(word.at(i)) && isConsonant(_second.at(i))){
-                //w += 2;
+                w += 2;
             }
         }
         return w;
