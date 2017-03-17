@@ -28,10 +28,8 @@ public:
         }
         _difference = first.length();
         searchPath();
-        postprocessing();
     }
     void postprocessing(){
-
         StringList::iterator current = _words.begin();
         while(true){
             if(current == _words.end()){
@@ -40,13 +38,9 @@ public:
             StringList::iterator from = current+1;
             StringList::iterator to = _words.end();
             StringList::iterator it = from;
-            while(true){
-                StringList::iterator found = std::find(it, _words.end(), (*current));
-                if(found != _words.end()){
-                    to = found+1;
-                    it = to;
-                }else{
-                    break;
+            for(it = from; it != _words.end(); ++it){
+                if(WordPath::difference(*it, *current) == 1){
+                    to = it;
                 }
             }
             if(from != _words.end() && to != _words.end()){

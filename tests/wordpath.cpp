@@ -3,8 +3,8 @@
 #include "wordpath.h"
 
 TEST(someTest, TestWordPath){
-    std::wstring first(L"кот");
-    std::wstring second(L"сыр");
+    std::wstring first(L"муха");
+    std::wstring second(L"слон");
     WordPath wordPath(first, second);
     const StringList& stringlist = wordPath.words();
 
