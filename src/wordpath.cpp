@@ -12,29 +12,6 @@ static int randomMinMax(int min, int max){
     return (rand()%(max - min + 1)) + min;
 }
 
-namespace {
-    struct OzhoegovDict{
-        void read(std::wifstream& in){
-            std::getline(in, VOCAB, L'|');
-            std::getline(in, BASEFORM, L'|');
-            std::getline(in, PHONGL, L'|');
-            std::getline(in, GRCLASSGL, L'|');
-            std::getline(in, STYLGL, L'|');
-            std::getline(in, DEF, L'|');
-            std::getline(in, ANTI, L'|');
-            std::getline(in, LEGLEXAM, L'\n');
-        }
-        std::wstring VOCAB;
-        std::wstring BASEFORM;
-        std::wstring PHONGL;
-        std::wstring GRCLASSGL;
-        std::wstring STYLGL;
-        std::wstring DEF;
-        std::wstring ANTI;
-        std::wstring LEGLEXAM;
-    };
-}
-
 class WordPath::Impl{
 public:
     explicit Impl(const String& first, const String& second, const char * wordsFilename):
@@ -81,17 +58,11 @@ public:
     bool chance(const int diff){
         int x = 100*(diff-1)/(_first.size()-1);
         bool ch = (randomMinMax(0, 100) <= x);
-#ifdef DEBUG
-        std::wcout << L"difference: " << diff << L"\n";
-        std::wcout << L"_first.size(): " << _first.size() << L"\n";
-        std::wcout << L"percent: " << x << L"\n";
-        std::wcout << L"chance: " << ch << L"\n";
-#endif
         return ch;
     }
 
     void searchPath(){
-        int maxPath = 10000;
+        int maxPath = 1000;
         int maxAttempts = 100;
         int statusBarSize = 35;
         for(int i=0; i<maxAttempts; ++i){
@@ -109,7 +80,7 @@ public:
             for(int count=0; count<maxPath; ++count){
                 _nextWords.clear();
                 int diff = WordPath::difference(_words.back(), _second);
-                bool useRandom = true;//chance(diff);
+                bool useRandom = chance(diff);
                 for(const auto& word: _dictionary){
                     if(WordPath::difference(word, _words.back()) == 1){
                         int pos = getFirstDiff(word, _words.back());
@@ -117,7 +88,7 @@ public:
                         if(!useRandom){
                             w = weight(word, pos);
                         }
-                        _nextWords.insert(std::pair<int, String>((w > 2)? 1: 0, word));
+                        _nextWords.insert(std::pair<int, String>(w , word));
                     }
                 }
                 if(_nextWords.empty()){
@@ -210,12 +181,13 @@ public:
         if(!in){
             return WordPath::DICTIONARY_NOT_FOUND;
         }
-        OzhoegovDict tmp;
+        std::wstring tmp;
+
         in.imbue(std::locale(RUS_LOCALE));
         while(true){
-            tmp.read(in);
-            if(tmp.VOCAB.length() == _first.length()){
-                _dictionary.insert(tmp.VOCAB);
+            in >> tmp;
+            if(tmp.length() == _first.length()){
+                _dictionary.insert(tmp);
             }
             if(!in.good()){
                 break;
