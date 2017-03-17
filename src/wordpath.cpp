@@ -83,10 +83,9 @@ public:
                 bool useRandom = chance(diff);
                 for(const auto& word: _dictionary){
                     if(WordPath::difference(word, _words.back()) == 1){
-                        int pos = getFirstDiff(word, _words.back());
                         int w = 1;
                         if(!useRandom){
-                            w = weight(word, pos);
+                            w = weight(word);
                         }
                         _nextWords.insert(std::pair<int, String>(w , word));
                     }
@@ -122,15 +121,6 @@ public:
             }
         }
     }
-    int getFirstDiff(const std::wstring& first, const std::wstring& second){
-        for(int i=0; i<first.length(); ++i){
-            if(first.at(i) != second.at(i)){
-                return i;
-            }
-        }
-        return -1;
-    }
-
     bool isVowel(const wchar_t wc) const{
         static const std::wstring vowels = L"аяоёуюыиэе";
         return vowels.find(wc) != std::wstring::npos;
@@ -140,7 +130,7 @@ public:
         return vowels.find(wc) != std::wstring::npos;
     }
 
-    int weight(const String& word, const int pos) const{
+    int weight(const String& word) const{
 #ifdef DEBUG
         std::wcout << _words.back() << L" => " << word << L" => " << _second << L"\n";
 #endif
