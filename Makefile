@@ -19,7 +19,7 @@ LIBS += -L$(GTEST_SRC)/lib/.libs -l:libgtest.a -lpthread
 
 
 CXXFLAGS += -std=c++11 $(INCLUDE)
-CXXFLAGS += -D STATUSBAR
+CXXFLAGS += -D PROGRESSBAR
 
 LOG_ERROR=@print(){ echo -e "\033[31m$$*\033[0m"; }; print
 LOG_INFO=@print(){ echo -e "\033[32m$$*\033[0m"; }; print
