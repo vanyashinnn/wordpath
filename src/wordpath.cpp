@@ -248,15 +248,3 @@ String WordPath::getErrorText(WordPath::Error error)
     }
     return L"Не известная ошибка.";
 }
-
-void WordPath::test() const
-{
-    std::wofstream out("out.txt");
-    out.imbue(std::locale(RUS_LOCALE));
-    out << "size: " << pimpl->_dictionary.size() << L"\n";
-    for(const auto & word: pimpl->_dictionary){
-        out << word << "\n";
-        std::wcout << word << "\n";
-    }
-    out.close();
-}

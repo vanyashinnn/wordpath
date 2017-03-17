@@ -26,7 +26,6 @@ public:
     StringList& words() const;
     static int difference(const String& first, const String& second);
     static String getErrorText(Error error);
-    void test() const;
 private:
     WordPath(const WordPath&);
     class Impl;
