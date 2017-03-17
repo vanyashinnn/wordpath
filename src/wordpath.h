@@ -19,7 +19,7 @@ public:
         WORDS_LENGTH_NOT_EQUAL,
         EMPTY_WORDS
     };
-    explicit WordPath(const String & first, const String & second, const char * wordsFilename = "res/OZHEGOV.TXT");
+    explicit WordPath(const String & first, const String & second, const char * wordsFilename = "res/dictionary");
     ~WordPath();
     Error status() const;
     String statusText() const;

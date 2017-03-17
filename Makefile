@@ -57,8 +57,7 @@ test-clean:
 ###########
 #   App   #
 ###########
-#app: tests-run $(APP)
-app:  $(APP)
+app: tests-run $(APP)
 $(APP): gtest $(APP_OBJECTS)
 	$(LOG_INFO) Сборка приложения
 	$(CXX) -o $(APP) $(APP_OBJECTS) $(LIBS)
