@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+
+#ifdef STATUSBAR
+#include <iomanip>
+#endif
+
 #include "wordpath.h"
 typedef std::multimap<int, String> WordsMap;
 typedef std::pair<WordsMap::iterator, WordsMap::iterator> WordsMapEqualRange;
@@ -58,17 +63,23 @@ public:
     void searchPath(){
         int maxPath = 1000;
         int maxAttempts = 100;
+#ifdef STATUSBAR
         int statusBarSize = 35;
+#endif
         for(int i=0; i<maxAttempts; ++i){
-            std::wcout << L"[";
+#ifdef STATUSBAR
+            int percent = (i*100)/maxAttempts;
+            int currentBar = (i*statusBarSize)/maxAttempts;
+            std::wcout << L"\033[32mПоиск: (" << std::setfill(L' ') << std::setw(3) << percent <<"%)[";
             for(int p=0; p<statusBarSize; ++p){
-                if(p <= (i*statusBarSize)/maxAttempts){
+                if(p <= currentBar){
                     std::wcout << L"#";
                 }else{
                     std::wcout << L" ";
                 }
             }
-            std::wcout << L"]\n";
+            std::wcout << L"]\033[0m\n";
+#endif
             _words.clear();
             _words.push_back(_first);
             for(int count=0; count<maxPath; ++count){
@@ -105,11 +116,13 @@ public:
                 std::wcout << word << L" (" << WordPath::difference(word, _second) << L")\n";
             }
 #endif
+#ifdef STATUSBAR
             std::wcout << L"\033[1A";
-            for(int p=0; p<(statusBarSize+2); ++p){
+            for(int p=0; p<(statusBarSize+20); ++p){
                 std::wcout << L" ";
             }
             std::wcout << L"\n\033[1A";
+#endif
             if(WordPath::PATH_FOUND == _status){
                 break;
             }
